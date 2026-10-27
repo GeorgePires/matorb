@@ -43,7 +43,6 @@ O botão **Tutor de contas**, ao lado de **Consultar material**, abre um espaço
 - Resposta confirmada fica bloqueada até avançar, impedindo pontuação duplicada.
 - Pontuação = acertos / total de questões da etapa × 100; acertos e erros finais somam o total.
 - De 90% a 100%: mensagem pedida, conquista e confetes. Em 100%, destaque para todos os acertos.
-- Comemoração em tela inteira: 240 confetes em oito cores, por aproximadamente 7 segundos, sem bloquear os botões. No modo de movimento reduzido, aparecem estáticos; no modo normal, caem pela tela. O Tutor de contas usa o mesmo efeito ao concluir uma conta.
 - De 80% a menos de 90%: mensagem positiva. Abaixo de 80%: orientação construtiva.
 - Revisão disponível antes de responder e revisão de todas as respostas ao final, inclusive os erros nas notas altas.
 - Refazer ou recomeçar zera a etapa. Mudar entre etapas de exercícios ou trocar o desafio inicia uma nova tentativa. Recarregar a página reinicia as respostas; não há persistência de notas ou coleta de dados. Somente as marcações do roteiro ficam salvas localmente.
