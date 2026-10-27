@@ -37,7 +37,7 @@ O botão **Tutor de contas**, ao lado de **Consultar material**, abre um espaço
 
 ### Exercícios de geometria
 
-- Prática: 22 questões (8 anteriores, 10 da folha e 4 complementares). Desafio final: simulado da folha com 10 questões ou desafio completo com 20 questões (10 anteriores + 10 da folha).
+- A seleção de conteúdo acompanha as quatro etapas. Circunferência e esfera: 12 questões de prática e 10 no desafio. Perímetro e áreas: 10 questões de prática e 10 no desafio. Na etapa Desafio final, a opção Revisão geral reúne 20 questões, sendo 10 de cada conteúdo.
 - Gabarito da folha: 1-C, 2-D, 3-B, 4-C, 5-C, 6-C, 7-B, 8-D, 9-C, 10-B. Cada resposta tem explicação e orientação sobre confusões comuns.
 - Dois blocos de estudo: Circunferência e esfera; Perímetro e áreas. Seis exemplos novos com revelação gradual dos passos, laboratório de área/perímetro e conversor m² ↔ cm².
 - Resposta confirmada fica bloqueada até avançar, impedindo pontuação duplicada.
@@ -45,7 +45,7 @@ O botão **Tutor de contas**, ao lado de **Consultar material**, abre um espaço
 - De 90% a 100%: mensagem pedida, conquista e confetes. Em 100%, destaque para todos os acertos.
 - De 80% a menos de 90%: mensagem positiva. Abaixo de 80%: orientação construtiva.
 - Revisão disponível antes de responder e revisão de todas as respostas ao final, inclusive os erros nas notas altas.
-- Refazer ou recomeçar zera a etapa. Mudar entre etapas de exercícios ou trocar o desafio inicia uma nova tentativa. Recarregar a página reinicia as respostas; não há persistência de notas ou coleta de dados. Somente as marcações do roteiro ficam salvas localmente.
+- Refazer ou recomeçar zera a etapa. Mudar entre etapas de exercícios, trocar o desafio ou selecionar outro conteúdo inicia uma nova tentativa. Selecionar novamente o mesmo conteúdo preserva a tentativa. Entrar no desafio a partir do estudo/prática abre o desafio do conteúdo escolhido; a mistura é opcional na Revisão geral. Recarregar a página reinicia as respostas; não há persistência de notas ou coleta de dados. Somente as marcações do roteiro ficam salvas localmente.
 - Navegação por teclado, foco visível, diálogos fecháveis por Escape, progresso identificado, feedback textual além de cores e respeito a movimento reduzido.
 
 ## Arquivos
