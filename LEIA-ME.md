@@ -24,6 +24,19 @@ As respostas didáticas da conversa anterior não puderam ser recuperadas como t
 
 ## Funcionamento
 
+### Tutor de contas
+
+O botão **Tutor de contas**, ao lado de **Consultar material**, abre um espaço independente do percurso de geometria:
+
+- **Descobrir:** grupos iguais, repartição, relação entre multiplicar/dividir, tabuada visual de 1 a 10, estratégias de dobro/metade/decomposição, valor posicional e conferência sem calculadora.
+- **Ver contas:** sete exemplos de contas armadas com etapas que podem ser avançadas, revistas ou reiniciadas. Inclui transporte de dezenas, produtos parciais, divisões exatas, resto, divisor de dois algarismos e zero no quociente.
+- **Meu caderno:** 18 exercícios (3 por nível e operação), com digitação do resultado de cada etapa, rascunho, dicas, feedback detalhado e solução para revisão. Os níveis são fácil, médio e difícil.
+- Uma estrela por conta diferente concluída na sessão, inclusive com ajuda. Repetir a mesma conta não gera estrelas extras. Conquistas em 1, 3 e 6 estrelas. O indicador de etapas certas na primeira tentativa não é uma nota.
+- A conta, o rascunho e as estrelas permanecem ao alternar entre tutor e geometria enquanto a página estiver aberta. Recarregar a página reinicia o tutor. Trocar operação, nível ou conta também reinicia a tentativa atual.
+- O tutor trabalha com números naturais e resto inteiro. Não apresenta divisão por zero nem aritmética decimal nesta versão. O rascunho é livre; a validação acontece nos campos de cada etapa.
+
+### Exercícios de geometria
+
 - Prática: 22 questões (8 anteriores, 10 da folha e 4 complementares). Desafio final: simulado da folha com 10 questões ou desafio completo com 20 questões (10 anteriores + 10 da folha).
 - Gabarito da folha: 1-C, 2-D, 3-B, 4-C, 5-C, 6-C, 7-B, 8-D, 9-C, 10-B. Cada resposta tem explicação e orientação sobre confusões comuns.
 - Dois blocos de estudo: Circunferência e esfera; Perímetro e áreas. Seis exemplos novos com revelação gradual dos passos, laboratório de área/perímetro e conversor m² ↔ cm².
@@ -37,6 +50,6 @@ As respostas didáticas da conversa anterior não puderam ser recuperadas como t
 
 ## Arquivos
 
-`dist/index.html`: estrutura; `dist/style.css`: apresentação responsiva; `dist/app.js`: conteúdo original; `dist/complemento.js`: conteúdo e interações da ampliação; `dist/material/`: oito páginas do PDF e quatro fotos novas.
+`dist/index.html`: estrutura; `dist/style.css`: apresentação responsiva; `dist/app.js`: conteúdo original; `dist/complemento.js`: conteúdo e interações da ampliação; `dist/tutor-engine.js`: etapas dos algoritmos; `dist/tutor.js` e `dist/tutor.css`: interface do tutor; `dist/material/`: oito páginas do PDF e quatro fotos novas.
 
 O site hospedado é privado por padrão. O pacote local pode ser usado offline sem acesso ao site.
