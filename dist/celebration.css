@@ -1,0 +1,5 @@
+/* Overlay ocupa toda a janela, independentemente da posição de rolagem. */
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:9999}
+#confetti i{position:absolute;top:-28px;opacity:1;animation-name:confetti-screen;animation-timing-function:linear;animation-fill-mode:both;will-change:transform}
+@keyframes confetti-screen{0%{transform:translate3d(0,0,0) rotate(0deg);opacity:1}85%{opacity:1}100%{transform:translate3d(var(--drift),calc(100vh + 64px),0) rotate(var(--spin));opacity:0}}
+@media(prefers-reduced-motion:reduce){#confetti{display:block}#confetti i{top:var(--still-top);animation:none!important;transform:rotate(var(--spin));opacity:1;will-change:auto}}
