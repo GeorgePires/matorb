@@ -1,0 +1,13 @@
+{
+  "name": "matorb",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Missão Matemática: plataforma educativa interativa para o 7º ano",
+  "scripts": {
+    "format": "prettier --write dist/*.html dist/*.css dist/*.js *.md *.json .prettierrc.json",
+    "format:check": "prettier --check dist/*.html dist/*.css dist/*.js *.md *.json .prettierrc.json"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}
