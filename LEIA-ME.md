@@ -52,4 +52,4 @@ O botão **Tutor de contas**, ao lado de **Consultar material**, abre um espaço
 
 `dist/index.html`: estrutura; `dist/style.css`: apresentação responsiva; `dist/app.js`: conteúdo original; `dist/complemento.js`: conteúdo e interações da ampliação; `dist/tutor-engine.js`: etapas dos algoritmos; `dist/tutor.js` e `dist/tutor.css`: interface do tutor; `dist/material/`: oito páginas do PDF e quatro fotos novas.
 
-O site hospedado é privado por padrão. O pacote local pode ser usado offline sem acesso ao site.
+O site hospedado está público em https://matorb.alighteft10.chatgpt.site/. O pacote local pode ser usado offline sem acesso ao site.
