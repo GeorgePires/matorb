@@ -1,54 +1,451 @@
 (() => {
-  const el=s=>document.querySelector(s);
-  const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  let tab='discover',lesson=0,shown=0,tableA=3,tableB=4;
-  let operation='mul',level='easy',taskIndex=0,stepIndex=0,plan=null,feedback=null,hinted=false,solved=false,draft='',scratch='',assisted=false,firstTry=0,attempted=false,completed=false,returnStage=0;
-  const earned=new Set();
-  let stars=0;
-  const lessons=[
-    {kind:'mul',a:23,b:4,title:'23 × 4 · uma linha de multiplicação',context:'Cada pacote tem 23 figurinhas. Quanto há em 4 pacotes?'},
-    {kind:'mul',a:47,b:6,title:'47 × 6 · entendendo o “vai um”',context:'Seis caixas têm 47 lápis cada. Vamos juntar as quantidades.'},
-    {kind:'mul',a:246,b:23,title:'246 × 23 · duas linhas de multiplicação',context:'São 23 caixas com 246 peças em cada uma. Vamos multiplicar por 3 e por 20.'},
-    {kind:'div',a:84,b:4,title:'84 ÷ 4 · divisão exata',context:'Vamos repartir 84 figurinhas igualmente entre 4 amigas.'},
-    {kind:'div',a:157,b:6,title:'157 ÷ 6 · quando sobra um resto',context:'Repartimos 157 lápis em 6 caixas iguais, usando apenas lápis inteiros.'},
-    {kind:'div',a:1248,b:12,title:'1.248 ÷ 12 · divisor de dois algarismos',context:'Há 1.248 livros para distribuir igualmente em 12 estantes.'},
-    {kind:'div',a:1005,b:5,title:'1.005 ÷ 5 · o zero não pode sumir',context:'O quociente precisa de um zero para guardar o lugar das dezenas.'}
+  const el = (s) => document.querySelector(s);
+  const escape = (s) =>
+    String(s).replace(
+      /[&<>"']/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+    );
+  let tab = 'discover',
+    lesson = 0,
+    shown = 0,
+    tableA = 3,
+    tableB = 4;
+  let operation = 'mul',
+    level = 'easy',
+    taskIndex = 0,
+    stepIndex = 0,
+    plan = null,
+    feedback = null,
+    hinted = false,
+    solved = false,
+    draft = '',
+    scratch = '',
+    assisted = false,
+    firstTry = 0,
+    attempted = false,
+    completed = false,
+    returnStage = 0;
+  const earned = new Set();
+  let stars = 0;
+  const lessons = [
+    {
+      kind: 'mul',
+      a: 23,
+      b: 4,
+      title: '23 × 4 · uma linha de multiplicação',
+      context: 'Cada pacote tem 23 figurinhas. Quanto há em 4 pacotes?',
+    },
+    {
+      kind: 'mul',
+      a: 47,
+      b: 6,
+      title: '47 × 6 · entendendo o “vai um”',
+      context: 'Seis caixas têm 47 lápis cada. Vamos juntar as quantidades.',
+    },
+    {
+      kind: 'mul',
+      a: 246,
+      b: 23,
+      title: '246 × 23 · duas linhas de multiplicação',
+      context: 'São 23 caixas com 246 peças em cada uma. Vamos multiplicar por 3 e por 20.',
+    },
+    {
+      kind: 'div',
+      a: 84,
+      b: 4,
+      title: '84 ÷ 4 · divisão exata',
+      context: 'Vamos repartir 84 figurinhas igualmente entre 4 amigas.',
+    },
+    {
+      kind: 'div',
+      a: 157,
+      b: 6,
+      title: '157 ÷ 6 · quando sobra um resto',
+      context: 'Repartimos 157 lápis em 6 caixas iguais, usando apenas lápis inteiros.',
+    },
+    {
+      kind: 'div',
+      a: 1248,
+      b: 12,
+      title: '1.248 ÷ 12 · divisor de dois algarismos',
+      context: 'Há 1.248 livros para distribuir igualmente em 12 estantes.',
+    },
+    {
+      kind: 'div',
+      a: 1005,
+      b: 5,
+      title: '1.005 ÷ 5 · o zero não pode sumir',
+      context: 'O quociente precisa de um zero para guardar o lugar das dezenas.',
+    },
   ];
-  const banks={
-    mul:{easy:[[6,4],[12,3],[21,2]],medium:[[47,6],[128,4],[32,12]],hard:[[246,23],[307,24],[508,36]]},
-    div:{easy:[[24,4],[36,6],[48,3]],medium:[[157,6],[248,8],[225,9]],hard:[[1248,12],[1005,5],[2865,15]]}
+  const banks = {
+    mul: {
+      easy: [
+        [6, 4],
+        [12, 3],
+        [21, 2],
+      ],
+      medium: [
+        [47, 6],
+        [128, 4],
+        [32, 12],
+      ],
+      hard: [
+        [246, 23],
+        [307, 24],
+        [508, 36],
+      ],
+    },
+    div: {
+      easy: [
+        [24, 4],
+        [36, 6],
+        [48, 3],
+      ],
+      medium: [
+        [157, 6],
+        [248, 8],
+        [225, 9],
+      ],
+      hard: [
+        [1248, 12],
+        [1005, 5],
+        [2865, 15],
+      ],
+    },
   };
-  const levelNames={easy:'Fácil',medium:'Médio',hard:'Difícil'};
-  const baseRender=render;
-  render=function(){el('#tutor').setAttribute('aria-current',stage===4?'page':'false');if(stage!==4){baseRender();return;}document.querySelectorAll('#nav button').forEach(b=>{b.classList.remove('active');b.removeAttribute('aria-current')});draw();};
-  el('#tutor').onclick=()=>{if(stage!==4)returnStage=stage;stage=4;render();el('#main').focus();window.scrollTo({top:0,behavior:'instant'})};
-  function build(kind,a,b){return kind==='mul'?TutorMath.multiplication(a,b):TutorMath.division(a,b)}
-  function header(){return hero('SEU TUTOR DE CONTAS · SEM PRESSA','Você entende.<br>Você consegue.','Multiplicar, dividir e conferir: um pequeno passo de cada vez, como no seu caderno.')+`<div class="tutor-toolbar"><div class="controls" aria-label="Seções do tutor">${[['discover','1 · Descobrir'],['examples','2 · Ver contas'],['practice','3 · Meu caderno']].map(([id,label])=>`<button class="chip ${tab===id?'selected':''}" data-tutor-tab="${id}" aria-pressed="${tab===id}">${label}</button>`).join('')}</div><span class="tutor-stars" aria-label="${stars} ${stars===1?'estrela conquistada':'estrelas conquistadas'} nesta sessão">✦ ${stars} ${stars===1?'estrela':'estrelas'}</span></div><p class="small">Comece pelas ideias, acompanhe os exemplos e depois tente sozinha. As conquistas valem nesta sessão; sair desta aba preserva seu treino enquanto a página estiver aberta.</p>`;}
-  function draw(){el('#main').innerHTML=header()+(tab==='discover'?discover():tab==='examples'?exampleView():practiceView())+`<div class="end-row"><button class="text-button" id="tutor-back">← Voltar ao estudo de geometria</button><span class="small">Aqui trabalhamos com números naturais e restos inteiros.</span></div>`;document.querySelectorAll('[data-tutor-tab]').forEach(b=>b.onclick=()=>{captureDraft();tab=b.dataset.tutorTab;draw();el('#main').focus()});el('#tutor-back').onclick=()=>navigate(returnStage);if(tab==='discover')bindDiscover();if(tab==='examples')bindExamples();if(tab==='practice')bindPractice();}
-  function captureDraft(){if(tab==='practice'){const a=el('#tutor-answer'),s=el('#tutor-scratch');if(a)draft=a.value;if(s)scratch=s.value;}}
-  function discover(){return `<section class="panel"><h2>Multiplicar é juntar grupos iguais</h2><p>Imagine <b>3 saquinhos com 4 balas em cada</b>: 4 + 4 + 4 = 12. Multiplicar é uma maneira curta de escrever essa soma: 3 × 4 = 12.</p><div class="tutor-array-layout"><div><label for="table-a">Quantidade de grupos <b id="table-a-label">${tableA}</b></label><input class="range" id="table-a" type="range" min="1" max="10" value="${tableA}"><label for="table-b">Objetos em cada grupo <b id="table-b-label">${tableB}</b></label><input class="range" id="table-b" type="range" min="1" max="10" value="${tableB}"><button class="secondary" id="swap-factors">Trocar os fatores ↔</button></div><div id="tutor-array"></div></div><div id="table-story" class="tip" aria-live="polite"></div></section><section class="panel"><h2>Dividir é repartir ou formar grupos</h2><p><b>Repartir:</b> 12 balas para 3 amigas → cada uma recebe 4.</p><div class="share-groups" role="img" aria-label="Três grupos de quatro balas, total de doze">${[1,2,3].map(n=>`<div><span aria-hidden="true">● ● ● ●</span><small>Amiga ${n}: 4 balas</small></div>`).join('')}</div><p><b>Formar grupos:</b> 12 balas, colocando 4 em cada saquinho → conseguimos 3 saquinhos.</p><p class="formula">3 × 4 = 12 &nbsp; ↔ &nbsp; 12 ÷ 3 = 4</p><p>Multiplicação e divisão se ajudam: se você conhece uma, pode descobrir a outra.</p><div class="tip"><b>E se forem 14 balas para 3 amigas?</b> Cada uma recebe 4 e sobram 2. Escrevemos: quociente 4, resto 2. Confira: 3 × 4 + 2 = 14.</div></section><section class="panel"><h2>Tabuada com sentido</h2><div class="tutor-tips"><article><h3>× 2, × 4 e × 8</h3><p>Faça o dobro. × 4 é dobrar duas vezes; × 8 é dobrar três vezes. Ex.: 7 × 4 → 14 → 28.</p></article><article><h3>× 5 e × 10</h3><p>× 10 forma dezenas. × 5 é metade disso: 8 × 10 = 80, então 8 × 5 = 40.</p></article><article><h3>× 9</h3><p>Use dez grupos e tire um: 9 × 7 = 10 × 7 − 7 = 70 − 7 = 63.</p></article><article><h3>Quebre em partes</h3><p>7 × 6 = 5 × 6 + 2 × 6 = 30 + 12 = 42. Apoie-se nas tabuadas que você já sabe!</p></article><article><h3>Troque a ordem</h3><p>3 × 8 e 8 × 3 dão 24. Na divisão, trocar a ordem geralmente muda o resultado.</p></article><article><h3>Zero e um</h3><p>× 1 mantém o número; × 0 dá zero. Dividir por 1 mantém o número. Zero dividido por um número positivo é zero. <b>Não existe divisão por zero.</b></p></article></div><p><b>Treino curto:</b> escolha três fatos por dia, desenhe os grupos, explique uma estratégia e só depois tente lembrar sem olhar.</p></section><section class="panel"><h2>O lugar de cada algarismo importa</h2><div class="place-value"><span><b>2</b>centenas</span><span><b>4</b>dezenas</span><span><b>6</b>unidades</span></div><p>246 = 200 + 40 + 6. Ao armar a multiplicação, alinhe <b>unidades com unidades</b> e comece pela direita.</p><p>Se aparecer 18 numa coluna, escreva 8 e leve 1 dezena para a próxima. O “vai um” não é mágica: <b>10 unidades viram 1 dezena</b>.</p><p>Em 246 × 23, multiplique por 3 e por <b>20</b>. A linha das dezenas termina com zero porque não estamos multiplicando apenas por 2.</p><details><summary>Na divisão, por onde eu começo?</summary><p>Comece pela esquerda do número a repartir. Use os primeiros algarismos até formar um número em que o divisor caiba. Depois repita: <b>divide → multiplica → subtrai → baixa</b>.</p><p>Ex.: 84 ÷ 4. Use primeiro o 8: 8 ÷ 4 = 2. Retire 8, sobra 0; baixe o 4 e repita. Resultado 21.</p><p>Se o divisor não couber numa etapa depois que você já começou o quociente, escreva <b>0</b> nessa posição. Não apague a casa.</p></details><details><summary>Como conferir sem calculadora?</summary><p>Na divisão: <b>divisor × quociente + resto = número inicial</b>. O resto deve ser menor que o divisor.</p><p>Na multiplicação: use outra decomposição ou a divisão inversa. Para 23 × 4, confira com 20 × 4 + 3 × 4 = 80 + 12 = 92.</p><p>Estime também: 47 × 6 é um pouco menor que 50 × 6 = 300. Um resultado como 2.820 não faz sentido.</p></details></section><div class="actions"><button class="primary" id="go-examples">Ver uma conta ganhar forma →</button></div>`;}
-  function bindDiscover(){el('#table-a').oninput=e=>{tableA=+e.target.value;arrayView()};el('#table-b').oninput=e=>{tableB=+e.target.value;arrayView()};el('#swap-factors').onclick=()=>{[tableA,tableB]=[tableB,tableA];el('#table-a').value=tableA;el('#table-b').value=tableB;arrayView()};el('#go-examples').onclick=()=>{tab='examples';draw();el('#main').focus()};arrayView();}
-  function arrayView(){el('#table-a-label').textContent=tableA;el('#table-b-label').textContent=tableB;el('#tutor-array').innerHTML=`<div class="dot-grid" style="grid-template-columns:repeat(${tableB},1fr)" role="img" aria-label="${tableA} grupos de ${tableB} objetos, total de ${tableA*tableB}">${Array.from({length:tableA*tableB},(_,i)=>`<i style="background:${Math.floor(i/tableB)%2?'#d9b35c':'#8764cc'}"></i>`).join('')}</div>`;el('#table-story').textContent=`${tableA} grupos de ${tableB}: ${Array(tableA).fill(tableB).join(' + ')} = ${tableA*tableB}. Portanto, ${tableA} × ${tableB} = ${tableA*tableB}.`}
-  function numberCells(value,width,active=-1){return String(value).padStart(width,' ').split('').map((c,i)=>`<span class="${width-1-i===active?'active-column':''}">${c===' '?'&nbsp;':c}</span>`).join('')}
-  function board(frame){if(frame.kind==='mul'){
-    const width=Math.max(String(frame.a*frame.b).length,String(frame.a).length+1,String(frame.b).length),carry=Array(width).fill(' ');frame.carries.forEach(c=>{if(c.column<width)carry[width-1-c.column]=String(c.value)});
-    return `<div class="notebook" aria-label="Multiplicação armada"><div class="column-key">Alinhe pela direita: … centenas · dezenas · unidades</div><div class="written-mul" style="--digits:${width}"><div class="math-row carry-row"><small>vai</small><div>${numberCells(carry.join(''),width)}</div></div><div class="math-row"><small></small><div>${numberCells(frame.a,width,frame.active)}</div></div><div class="math-row under"><small>×</small><div>${numberCells(frame.b,width)}</div></div>${frame.partials.map((p,i)=>`<div class="math-row partial"><small>${p.label}</small><div>${numberCells(p.value||'·',width)}</div></div>`).join('')}${frame.result?`<div class="math-row total"><small>=</small><div>${numberCells(frame.result,width)}</div></div>`:''}</div><p class="small">Os números pequenos na linha “vai” representam o reagrupamento. A coluna em destaque é a que está sendo trabalhada.</p></div>`;
+  const levelNames = { easy: 'Fácil', medium: 'Médio', hard: 'Difícil' };
+  const baseRender = render;
+  render = function () {
+    el('#tutor').setAttribute('aria-current', stage === 4 ? 'page' : 'false');
+    if (stage !== 4) {
+      baseRender();
+      return;
     }
-    const width=String(frame.a).length;
-    return `<div class="notebook" aria-label="Divisão armada na chave"><div class="column-key">Número a repartir à esquerda; divisor e quociente à direita.</div><div class="division-board"><div class="dividend"><div>${escape(frame.a)}</div>${frame.lines.map(l=>`<div class="long-line ${l.rule?'subtract-rule':''} ${l.down?'brought-down':''}">${l.operator||' '}${' '.repeat(Math.max(0,l.end+1-l.value.length))}${l.value}${' '.repeat(width-l.end-1)}</div>`).join('')}</div><div class="division-key"><div>${frame.b}<small>divisor</small></div><div>${frame.quotient||'…'}<small>quociente</small></div></div></div><p class="small">Número usado nesta etapa: <b>${frame.current}</b>. Uma linha roxa indica que baixamos o próximo algarismo.</p></div>`;
+    document.querySelectorAll('#nav button').forEach((b) => {
+      b.classList.remove('active');
+      b.removeAttribute('aria-current');
+    });
+    draw();
+  };
+  el('#tutor').onclick = () => {
+    if (stage !== 4) returnStage = stage;
+    stage = 4;
+    render();
+    el('#main').focus();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+  function build(kind, a, b) {
+    return kind === 'mul' ? TutorMath.multiplication(a, b) : TutorMath.division(a, b);
   }
-  function exampleView(){const item=lessons[lesson],p=build(item.kind,item.a,item.b),s=p.steps[Math.max(0,shown-1)];return `<section class="panel"><label for="tutor-lesson"><b>Escolha uma conta</b></label><select class="wide-select" id="tutor-lesson">${lessons.map((x,i)=>`<option value="${i}" ${lesson===i?'selected':''}>${x.title}</option>`).join('')}</select><p>${item.context}</p><div class="tutor-workspace">${board(shown?p.steps[shown-1].after:p.initial)}<div class="tutor-explain" aria-live="polite"><span class="eyebrow">${shown?`ETAPA ${shown} DE ${p.steps.length}`:'PREPARE SEU CADERNO'}</span><h2>${shown?s.title:'Vamos armar a conta'}</h2><p>${shown?s.why:item.kind==='mul'?'Escreva um número abaixo do outro, alinhando as unidades. Começaremos multiplicando pela direita.':`Escreva ${item.a} à esquerda e ${item.b} à direita da chave. Comece com ${p.initial.current}, formado pelos primeiros algarismos à esquerda.`}</p>${shown===p.steps.length?`<div class="tip"><b>${p.kind==='mul'?`${p.a} × ${p.b} = ${p.answer}`:`Quociente: ${p.answer} · resto: ${p.remainder}`}</b><p>${p.check}</p></div>`:''}<div class="actions"><button class="secondary" id="example-prev" ${shown===0?'disabled':''}>← Voltar etapa</button><button class="primary" id="example-next" ${shown===p.steps.length?'disabled':''}>Próxima etapa →</button><button class="text-button" id="example-reset">Recomeçar</button></div></div></div><details><summary>Ver a explicação completa em texto</summary><ol>${p.steps.map(x=>`<li><b>${x.title}:</b> ${x.why}</li>`).join('')}</ol></details></section><div class="actions"><button class="primary" id="go-notebook">Agora quero tentar →</button></div>`;}
-  function bindExamples(){el('#tutor-lesson').onchange=e=>{lesson=+e.target.value;shown=0;draw();el('#tutor-lesson').focus()};el('#example-next').onclick=()=>{shown++;draw();el(shown===build(lessons[lesson].kind,lessons[lesson].a,lessons[lesson].b).steps.length?'#example-prev':'#example-next').focus()};el('#example-prev').onclick=()=>{shown--;draw();el('#example-next').focus()};el('#example-reset').onclick=()=>{shown=0;draw();el('#example-next').focus()};el('#go-notebook').onclick=()=>{tab='practice';draw();el('#main').focus()};}
-  function start(){const [a,b]=banks[operation][level][taskIndex];plan=build(operation,a,b);stepIndex=0;feedback=null;hinted=false;solved=false;draft='';scratch='';assisted=false;firstTry=0;attempted=false;completed=false;}
-  function settings(){return `<section class="panel tutor-settings"><div><label for="tutor-operation">Operação</label><select id="tutor-operation"><option value="mul" ${operation==='mul'?'selected':''}>Multiplicação</option><option value="div" ${operation==='div'?'selected':''}>Divisão</option></select></div><div><label for="tutor-level">Nível</label><select id="tutor-level">${Object.entries(levelNames).map(([k,v])=>`<option value="${k}" ${level===k?'selected':''}>${v}</option>`).join('')}</select></div><div><label for="tutor-task">Conta</label><select id="tutor-task">${banks[operation][level].map(([a,b],i)=>`<option value="${i}" ${taskIndex===i?'selected':''}>${i+1}. ${fmt(a)} ${operation==='mul'?'×':'÷'} ${b}</option>`).join('')}</select></div><p class="small">São 3 contas por nível e operação (18 ao todo). Trocar uma seleção reinicia a conta. Você pode repetir sem limite.</p></section>`;}
-  function practiceView(){if(!plan)start();if(completed)return settings()+completeView();const s=plan.steps[stepIndex];return settings()+`<section class="panel"><div class="quiz-top"><b>${plan.a} ${operation==='mul'?'×':'÷'} ${plan.b}</b><span class="small">${levelNames[level]} · etapa ${stepIndex+1} de ${plan.steps.length}</span></div><div class="progress" role="progressbar" aria-label="Etapas concluídas da conta" aria-valuemin="0" aria-valuemax="${plan.steps.length}" aria-valuenow="${stepIndex+(solved?1:0)}"><span style="width:${(stepIndex+(solved?1:0))/plan.steps.length*100}%"></span></div><div class="tutor-workspace">${board(solved?s.after:s.before)}<div class="tutor-explain"><span class="eyebrow">${s.title}</span><h2>${s.prompt}</h2><form id="tutor-form"><label for="tutor-answer">Escreva o resultado desta etapa</label><input id="tutor-answer" class="tutor-answer" type="text" inputmode="numeric" autocomplete="off" maxlength="12" value="${escape(draft)}" ${solved?'disabled':''} aria-describedby="tutor-help"><p id="tutor-help" class="small">Use apenas algarismos, sem separador de milhar. Calcule no espaço de rascunho, se precisar.</p><div class="actions"><button class="primary" type="submit" ${solved?'disabled':''}>Conferir etapa</button><button class="secondary" type="button" id="tutor-hint" ${solved?'disabled':''}>Quero uma dica</button></div></form>${hinted?`<div class="tip"><b>Uma pista:</b> ${s.hint}</div>`:''}<div id="tutor-feedback" aria-live="polite">${feedback?`<div class="feedback ${feedback.type==='correct'?'':'wrong'}"><b>${feedback.title}</b><p>${feedback.text}</p></div>`:''}</div>${solved?`<button class="primary next-tutor" id="tutor-next">${stepIndex===plan.steps.length-1?'Concluir conta ✦':'Continuar a conta →'}</button>`:feedback?.type==='wrong'?'<button class="text-button" id="tutor-reveal">Ver esta etapa resolvida e continuar</button>':''}</div></div><label class="scratch-label" for="tutor-scratch">Meu rascunho · escreva suas contas como no caderno</label><textarea id="tutor-scratch" class="scratch" rows="5" spellcheck="false" placeholder="Ex.: 7 × 6 = 5 × 6 + 2 × 6\n30 + 12 = ...">${escape(scratch)}</textarea><div class="actions"><button class="text-button" id="clear-scratch">Apagar rascunho</button><button class="text-button" id="restart-tutor">Recomeçar esta conta</button></div></section><p class="small">Dicas e erros não tiram estrelas. Uma conta concluída rende uma estrela na primeira conclusão desta sessão, mesmo com ajuda.</p>`;}
-  function bindPractice(){['operation','level','task'].forEach(name=>el('#tutor-'+name).onchange=e=>{if(name==='operation'){operation=e.target.value;taskIndex=0;}else if(name==='level'){level=e.target.value;taskIndex=0;}else taskIndex=+e.target.value;start();draw();el('#tutor-'+name).focus()});if(completed){el('#tutor-repeat').onclick=()=>{start();draw()};el('#tutor-another').onclick=()=>{taskIndex=(taskIndex+1)%3;start();draw()};el('#tutor-level-up').onclick=()=>{level=level==='easy'?'medium':level==='medium'?'hard':'easy';taskIndex=0;start();draw()};el('#tutor-solution').onclick=()=>openDialog(`<h2>A conta inteira, com calma</h2>${board(plan.final)}<ol>${plan.steps.map(s=>`<li><b>${s.title}:</b> ${s.why}</li>`).join('')}</ol>`);return;}
-    el('#tutor-answer').oninput=e=>draft=e.target.value;el('#tutor-scratch').oninput=e=>scratch=e.target.value;
-    el('#tutor-form').onsubmit=e=>{e.preventDefault();if(solved)return;captureDraft();const s=plan.steps[stepIndex],status=TutorMath.grade(draft,s.answer);if(status==='invalid'){feedback={type:'invalid',title:'Vamos ajustar a escrita',text:'Digite um número natural usando apenas algarismos. Não deixe em branco; não use vírgula, ponto ou sinal.'};}else if(status==='correct'){if(!attempted&&!hinted)firstTry++;solved=true;feedback={type:'correct',title:'✓ Você encontrou o caminho!',text:s.why};}else{attempted=true;assisted=true;feedback={type:'wrong',title:'Vamos olhar este passo com calma',text:`Nesta etapa, esperamos ${s.answer}. ${s.why} Digite esse valor para registrar a etapa, ou veja a resolução e siga acompanhando.`};}draw();el(solved?'#tutor-next':'#tutor-answer').focus();};
-    el('#tutor-hint').onclick=()=>{captureDraft();hinted=true;assisted=true;draw();el('#tutor-answer').focus()};
-    if(el('#tutor-reveal'))el('#tutor-reveal').onclick=()=>{captureDraft();draft=String(plan.steps[stepIndex].answer);solved=true;assisted=true;feedback={type:'correct',title:'Etapa estudada com ajuda',text:plan.steps[stepIndex].why};draw();el('#tutor-next').focus()};
-    if(el('#tutor-next'))el('#tutor-next').onclick=()=>{captureDraft();if(stepIndex===plan.steps.length-1){completed=true;const key=`${operation}-${level}-${taskIndex}`;if(!earned.has(key)){earned.add(key);stars++;}draw();el('#main').focus();if(!matchMedia('(prefers-reduced-motion: reduce)').matches)celebrate();}else{stepIndex++;solved=false;feedback=null;hinted=false;attempted=false;draft='';draw();el('#tutor-answer').focus()}};
-    el('#clear-scratch').onclick=()=>{scratch='';el('#tutor-scratch').value='';el('#tutor-scratch').focus()};el('#restart-tutor').onclick=()=>{start();draw();el('#tutor-answer').focus()};
+  function header() {
+    return (
+      hero(
+        'SEU TUTOR DE CONTAS · SEM PRESSA',
+        'Você entende.<br>Você consegue.',
+        'Multiplicar, dividir e conferir: um pequeno passo de cada vez, como no seu caderno.',
+      ) +
+      `<div class="tutor-toolbar"><div class="controls" aria-label="Seções do tutor">${[
+        ['discover', '1 · Descobrir'],
+        ['examples', '2 · Ver contas'],
+        ['practice', '3 · Meu caderno'],
+      ]
+        .map(
+          ([id, label]) =>
+            `<button class="chip ${tab === id ? 'selected' : ''}" data-tutor-tab="${id}" aria-pressed="${tab === id}">${label}</button>`,
+        )
+        .join(
+          '',
+        )}</div><span class="tutor-stars" aria-label="${stars} ${stars === 1 ? 'estrela conquistada' : 'estrelas conquistadas'} nesta sessão">✦ ${stars} ${stars === 1 ? 'estrela' : 'estrelas'}</span></div><p class="small">Comece pelas ideias, acompanhe os exemplos e depois tente sozinha. As conquistas valem nesta sessão; sair desta aba preserva seu treino enquanto a página estiver aberta.</p>`
+    );
   }
-  function completeView(){const badge=stars>=6?'Exploradora de estratégias':stars>=3?'Construtora de confiança':'Primeiro passo conquistado';return `<section class="panel result"><div class="badge" aria-hidden="true">✦</div><span class="pill">${badge}</span><h2>Você completou uma conta!</h2><p class="formula">${plan.kind==='mul'?`${plan.a} × ${plan.b} = ${plan.answer}`:`${plan.a} ÷ ${plan.b}: quociente ${plan.answer}, resto ${plan.remainder}`}</p><p>${assisted?'Você usou o apoio para entender o caminho. Agora vale refazer e explicar os passos com suas próprias palavras.':'Você construiu a solução etapa por etapa. Tente contar como pensou para outra pessoa!'}</p><p><b>${firstTry} de ${plan.steps.length}</b> etapas certas na primeira tentativa, sem dica.</p><p class="small">Esse indicador é de prática, não uma nota. Conferir o próprio raciocínio faz parte de aprender.</p><div class="tip">${plan.check}</div><div class="actions" style="justify-content:center"><button class="primary" id="tutor-another">Próxima conta →</button><button class="secondary" id="tutor-repeat">Refazer esta conta</button><button class="secondary" id="tutor-solution">Revisar toda a solução</button><button class="text-button" id="tutor-level-up">${level==='hard'?'Voltar ao nível fácil':'Experimentar o próximo nível'}</button></div></section>`;}
+  function draw() {
+    el('#main').innerHTML =
+      header() +
+      (tab === 'discover' ? discover() : tab === 'examples' ? exampleView() : practiceView()) +
+      `<div class="end-row"><button class="text-button" id="tutor-back">← Voltar ao estudo de geometria</button><span class="small">Aqui trabalhamos com números naturais e restos inteiros.</span></div>`;
+    document.querySelectorAll('[data-tutor-tab]').forEach(
+      (b) =>
+        (b.onclick = () => {
+          captureDraft();
+          tab = b.dataset.tutorTab;
+          draw();
+          el('#main').focus();
+        }),
+    );
+    el('#tutor-back').onclick = () => navigate(returnStage);
+    if (tab === 'discover') bindDiscover();
+    if (tab === 'examples') bindExamples();
+    if (tab === 'practice') bindPractice();
+  }
+  function captureDraft() {
+    if (tab === 'practice') {
+      const a = el('#tutor-answer'),
+        s = el('#tutor-scratch');
+      if (a) draft = a.value;
+      if (s) scratch = s.value;
+    }
+  }
+  function discover() {
+    return `<section class="panel"><h2>Multiplicar é juntar grupos iguais</h2><p>Imagine <b>3 saquinhos com 4 balas em cada</b>: 4 + 4 + 4 = 12. Multiplicar é uma maneira curta de escrever essa soma: 3 × 4 = 12.</p><div class="tutor-array-layout"><div><label for="table-a">Quantidade de grupos <b id="table-a-label">${tableA}</b></label><input class="range" id="table-a" type="range" min="1" max="10" value="${tableA}"><label for="table-b">Objetos em cada grupo <b id="table-b-label">${tableB}</b></label><input class="range" id="table-b" type="range" min="1" max="10" value="${tableB}"><button class="secondary" id="swap-factors">Trocar os fatores ↔</button></div><div id="tutor-array"></div></div><div id="table-story" class="tip" aria-live="polite"></div></section><section class="panel"><h2>Dividir é repartir ou formar grupos</h2><p><b>Repartir:</b> 12 balas para 3 amigas → cada uma recebe 4.</p><div class="share-groups" role="img" aria-label="Três grupos de quatro balas, total de doze">${[1, 2, 3].map((n) => `<div><span aria-hidden="true">● ● ● ●</span><small>Amiga ${n}: 4 balas</small></div>`).join('')}</div><p><b>Formar grupos:</b> 12 balas, colocando 4 em cada saquinho → conseguimos 3 saquinhos.</p><p class="formula">3 × 4 = 12 &nbsp; ↔ &nbsp; 12 ÷ 3 = 4</p><p>Multiplicação e divisão se ajudam: se você conhece uma, pode descobrir a outra.</p><div class="tip"><b>E se forem 14 balas para 3 amigas?</b> Cada uma recebe 4 e sobram 2. Escrevemos: quociente 4, resto 2. Confira: 3 × 4 + 2 = 14.</div></section><section class="panel"><h2>Tabuada com sentido</h2><div class="tutor-tips"><article><h3>× 2, × 4 e × 8</h3><p>Faça o dobro. × 4 é dobrar duas vezes; × 8 é dobrar três vezes. Ex.: 7 × 4 → 14 → 28.</p></article><article><h3>× 5 e × 10</h3><p>× 10 forma dezenas. × 5 é metade disso: 8 × 10 = 80, então 8 × 5 = 40.</p></article><article><h3>× 9</h3><p>Use dez grupos e tire um: 9 × 7 = 10 × 7 − 7 = 70 − 7 = 63.</p></article><article><h3>Quebre em partes</h3><p>7 × 6 = 5 × 6 + 2 × 6 = 30 + 12 = 42. Apoie-se nas tabuadas que você já sabe!</p></article><article><h3>Troque a ordem</h3><p>3 × 8 e 8 × 3 dão 24. Na divisão, trocar a ordem geralmente muda o resultado.</p></article><article><h3>Zero e um</h3><p>× 1 mantém o número; × 0 dá zero. Dividir por 1 mantém o número. Zero dividido por um número positivo é zero. <b>Não existe divisão por zero.</b></p></article></div><p><b>Treino curto:</b> escolha três fatos por dia, desenhe os grupos, explique uma estratégia e só depois tente lembrar sem olhar.</p></section><section class="panel"><h2>O lugar de cada algarismo importa</h2><div class="place-value"><span><b>2</b>centenas</span><span><b>4</b>dezenas</span><span><b>6</b>unidades</span></div><p>246 = 200 + 40 + 6. Ao armar a multiplicação, alinhe <b>unidades com unidades</b> e comece pela direita.</p><p>Se aparecer 18 numa coluna, escreva 8 e leve 1 dezena para a próxima. O “vai um” não é mágica: <b>10 unidades viram 1 dezena</b>.</p><p>Em 246 × 23, multiplique por 3 e por <b>20</b>. A linha das dezenas termina com zero porque não estamos multiplicando apenas por 2.</p><details><summary>Na divisão, por onde eu começo?</summary><p>Comece pela esquerda do número a repartir. Use os primeiros algarismos até formar um número em que o divisor caiba. Depois repita: <b>divide → multiplica → subtrai → baixa</b>.</p><p>Ex.: 84 ÷ 4. Use primeiro o 8: 8 ÷ 4 = 2. Retire 8, sobra 0; baixe o 4 e repita. Resultado 21.</p><p>Se o divisor não couber numa etapa depois que você já começou o quociente, escreva <b>0</b> nessa posição. Não apague a casa.</p></details><details><summary>Como conferir sem calculadora?</summary><p>Na divisão: <b>divisor × quociente + resto = número inicial</b>. O resto deve ser menor que o divisor.</p><p>Na multiplicação: use outra decomposição ou a divisão inversa. Para 23 × 4, confira com 20 × 4 + 3 × 4 = 80 + 12 = 92.</p><p>Estime também: 47 × 6 é um pouco menor que 50 × 6 = 300. Um resultado como 2.820 não faz sentido.</p></details></section><div class="actions"><button class="primary" id="go-examples">Ver uma conta ganhar forma →</button></div>`;
+  }
+  function bindDiscover() {
+    el('#table-a').oninput = (e) => {
+      tableA = +e.target.value;
+      arrayView();
+    };
+    el('#table-b').oninput = (e) => {
+      tableB = +e.target.value;
+      arrayView();
+    };
+    el('#swap-factors').onclick = () => {
+      [tableA, tableB] = [tableB, tableA];
+      el('#table-a').value = tableA;
+      el('#table-b').value = tableB;
+      arrayView();
+    };
+    el('#go-examples').onclick = () => {
+      tab = 'examples';
+      draw();
+      el('#main').focus();
+    };
+    arrayView();
+  }
+  function arrayView() {
+    el('#table-a-label').textContent = tableA;
+    el('#table-b-label').textContent = tableB;
+    el('#tutor-array').innerHTML =
+      `<div class="dot-grid" style="grid-template-columns:repeat(${tableB},1fr)" role="img" aria-label="${tableA} grupos de ${tableB} objetos, total de ${tableA * tableB}">${Array.from({ length: tableA * tableB }, (_, i) => `<i style="background:${Math.floor(i / tableB) % 2 ? '#d9b35c' : '#8764cc'}"></i>`).join('')}</div>`;
+    el('#table-story').textContent =
+      `${tableA} grupos de ${tableB}: ${Array(tableA).fill(tableB).join(' + ')} = ${tableA * tableB}. Portanto, ${tableA} × ${tableB} = ${tableA * tableB}.`;
+  }
+  function numberCells(value, width, active = -1) {
+    return String(value)
+      .padStart(width, ' ')
+      .split('')
+      .map(
+        (c, i) =>
+          `<span class="${width - 1 - i === active ? 'active-column' : ''}">${c === ' ' ? '&nbsp;' : c}</span>`,
+      )
+      .join('');
+  }
+  function board(frame) {
+    if (frame.kind === 'mul') {
+      const width = Math.max(
+          String(frame.a * frame.b).length,
+          String(frame.a).length + 1,
+          String(frame.b).length,
+        ),
+        carry = Array(width).fill(' ');
+      frame.carries.forEach((c) => {
+        if (c.column < width) carry[width - 1 - c.column] = String(c.value);
+      });
+      return `<div class="notebook" aria-label="Multiplicação armada"><div class="column-key">Alinhe pela direita: … centenas · dezenas · unidades</div><div class="written-mul" style="--digits:${width}"><div class="math-row carry-row"><small>vai</small><div>${numberCells(carry.join(''), width)}</div></div><div class="math-row"><small></small><div>${numberCells(frame.a, width, frame.active)}</div></div><div class="math-row under"><small>×</small><div>${numberCells(frame.b, width)}</div></div>${frame.partials.map((p, i) => `<div class="math-row partial"><small>${p.label}</small><div>${numberCells(p.value || '·', width)}</div></div>`).join('')}${frame.result ? `<div class="math-row total"><small>=</small><div>${numberCells(frame.result, width)}</div></div>` : ''}</div><p class="small">Os números pequenos na linha “vai” representam o reagrupamento. A coluna em destaque é a que está sendo trabalhada.</p></div>`;
+    }
+    const width = String(frame.a).length;
+    return `<div class="notebook" aria-label="Divisão armada na chave"><div class="column-key">Número a repartir à esquerda; divisor e quociente à direita.</div><div class="division-board"><div class="dividend"><div>${escape(frame.a)}</div>${frame.lines.map((l) => `<div class="long-line ${l.rule ? 'subtract-rule' : ''} ${l.down ? 'brought-down' : ''}">${l.operator || ' '}${' '.repeat(Math.max(0, l.end + 1 - l.value.length))}${l.value}${' '.repeat(width - l.end - 1)}</div>`).join('')}</div><div class="division-key"><div>${frame.b}<small>divisor</small></div><div>${frame.quotient || '…'}<small>quociente</small></div></div></div><p class="small">Número usado nesta etapa: <b>${frame.current}</b>. Uma linha roxa indica que baixamos o próximo algarismo.</p></div>`;
+  }
+  function exampleView() {
+    const item = lessons[lesson],
+      p = build(item.kind, item.a, item.b),
+      s = p.steps[Math.max(0, shown - 1)];
+    return `<section class="panel"><label for="tutor-lesson"><b>Escolha uma conta</b></label><select class="wide-select" id="tutor-lesson">${lessons.map((x, i) => `<option value="${i}" ${lesson === i ? 'selected' : ''}>${x.title}</option>`).join('')}</select><p>${item.context}</p><div class="tutor-workspace">${board(shown ? p.steps[shown - 1].after : p.initial)}<div class="tutor-explain" aria-live="polite"><span class="eyebrow">${shown ? `ETAPA ${shown} DE ${p.steps.length}` : 'PREPARE SEU CADERNO'}</span><h2>${shown ? s.title : 'Vamos armar a conta'}</h2><p>${shown ? s.why : item.kind === 'mul' ? 'Escreva um número abaixo do outro, alinhando as unidades. Começaremos multiplicando pela direita.' : `Escreva ${item.a} à esquerda e ${item.b} à direita da chave. Comece com ${p.initial.current}, formado pelos primeiros algarismos à esquerda.`}</p>${shown === p.steps.length ? `<div class="tip"><b>${p.kind === 'mul' ? `${p.a} × ${p.b} = ${p.answer}` : `Quociente: ${p.answer} · resto: ${p.remainder}`}</b><p>${p.check}</p></div>` : ''}<div class="actions"><button class="secondary" id="example-prev" ${shown === 0 ? 'disabled' : ''}>← Voltar etapa</button><button class="primary" id="example-next" ${shown === p.steps.length ? 'disabled' : ''}>Próxima etapa →</button><button class="text-button" id="example-reset">Recomeçar</button></div></div></div><details><summary>Ver a explicação completa em texto</summary><ol>${p.steps.map((x) => `<li><b>${x.title}:</b> ${x.why}</li>`).join('')}</ol></details></section><div class="actions"><button class="primary" id="go-notebook">Agora quero tentar →</button></div>`;
+  }
+  function bindExamples() {
+    el('#tutor-lesson').onchange = (e) => {
+      lesson = +e.target.value;
+      shown = 0;
+      draw();
+      el('#tutor-lesson').focus();
+    };
+    el('#example-next').onclick = () => {
+      shown++;
+      draw();
+      el(
+        shown === build(lessons[lesson].kind, lessons[lesson].a, lessons[lesson].b).steps.length
+          ? '#example-prev'
+          : '#example-next',
+      ).focus();
+    };
+    el('#example-prev').onclick = () => {
+      shown--;
+      draw();
+      el('#example-next').focus();
+    };
+    el('#example-reset').onclick = () => {
+      shown = 0;
+      draw();
+      el('#example-next').focus();
+    };
+    el('#go-notebook').onclick = () => {
+      tab = 'practice';
+      draw();
+      el('#main').focus();
+    };
+  }
+  function start() {
+    const [a, b] = banks[operation][level][taskIndex];
+    plan = build(operation, a, b);
+    stepIndex = 0;
+    feedback = null;
+    hinted = false;
+    solved = false;
+    draft = '';
+    scratch = '';
+    assisted = false;
+    firstTry = 0;
+    attempted = false;
+    completed = false;
+  }
+  function settings() {
+    return `<section class="panel tutor-settings"><div><label for="tutor-operation">Operação</label><select id="tutor-operation"><option value="mul" ${operation === 'mul' ? 'selected' : ''}>Multiplicação</option><option value="div" ${operation === 'div' ? 'selected' : ''}>Divisão</option></select></div><div><label for="tutor-level">Nível</label><select id="tutor-level">${Object.entries(
+      levelNames,
+    )
+      .map(([k, v]) => `<option value="${k}" ${level === k ? 'selected' : ''}>${v}</option>`)
+      .join(
+        '',
+      )}</select></div><div><label for="tutor-task">Conta</label><select id="tutor-task">${banks[operation][level].map(([a, b], i) => `<option value="${i}" ${taskIndex === i ? 'selected' : ''}>${i + 1}. ${fmt(a)} ${operation === 'mul' ? '×' : '÷'} ${b}</option>`).join('')}</select></div><p class="small">São 3 contas por nível e operação (18 ao todo). Trocar uma seleção reinicia a conta. Você pode repetir sem limite.</p></section>`;
+  }
+  function practiceView() {
+    if (!plan) start();
+    if (completed) return settings() + completeView();
+    const s = plan.steps[stepIndex];
+    return (
+      settings() +
+      `<section class="panel"><div class="quiz-top"><b>${plan.a} ${operation === 'mul' ? '×' : '÷'} ${plan.b}</b><span class="small">${levelNames[level]} · etapa ${stepIndex + 1} de ${plan.steps.length}</span></div><div class="progress" role="progressbar" aria-label="Etapas concluídas da conta" aria-valuemin="0" aria-valuemax="${plan.steps.length}" aria-valuenow="${stepIndex + (solved ? 1 : 0)}"><span style="width:${((stepIndex + (solved ? 1 : 0)) / plan.steps.length) * 100}%"></span></div><div class="tutor-workspace">${board(solved ? s.after : s.before)}<div class="tutor-explain"><span class="eyebrow">${s.title}</span><h2>${s.prompt}</h2><form id="tutor-form"><label for="tutor-answer">Escreva o resultado desta etapa</label><input id="tutor-answer" class="tutor-answer" type="text" inputmode="numeric" autocomplete="off" maxlength="12" value="${escape(draft)}" ${solved ? 'disabled' : ''} aria-describedby="tutor-help"><p id="tutor-help" class="small">Use apenas algarismos, sem separador de milhar. Calcule no espaço de rascunho, se precisar.</p><div class="actions"><button class="primary" type="submit" ${solved ? 'disabled' : ''}>Conferir etapa</button><button class="secondary" type="button" id="tutor-hint" ${solved ? 'disabled' : ''}>Quero uma dica</button></div></form>${hinted ? `<div class="tip"><b>Uma pista:</b> ${s.hint}</div>` : ''}<div id="tutor-feedback" aria-live="polite">${feedback ? `<div class="feedback ${feedback.type === 'correct' ? '' : 'wrong'}"><b>${feedback.title}</b><p>${feedback.text}</p></div>` : ''}</div>${solved ? `<button class="primary next-tutor" id="tutor-next">${stepIndex === plan.steps.length - 1 ? 'Concluir conta ✦' : 'Continuar a conta →'}</button>` : feedback?.type === 'wrong' ? '<button class="text-button" id="tutor-reveal">Ver esta etapa resolvida e continuar</button>' : ''}</div></div><label class="scratch-label" for="tutor-scratch">Meu rascunho · escreva suas contas como no caderno</label><textarea id="tutor-scratch" class="scratch" rows="5" spellcheck="false" placeholder="Ex.: 7 × 6 = 5 × 6 + 2 × 6\n30 + 12 = ...">${escape(scratch)}</textarea><div class="actions"><button class="text-button" id="clear-scratch">Apagar rascunho</button><button class="text-button" id="restart-tutor">Recomeçar esta conta</button></div></section><p class="small">Dicas e erros não tiram estrelas. Uma conta concluída rende uma estrela na primeira conclusão desta sessão, mesmo com ajuda.</p>`
+    );
+  }
+  function bindPractice() {
+    ['operation', 'level', 'task'].forEach(
+      (name) =>
+        (el('#tutor-' + name).onchange = (e) => {
+          if (name === 'operation') {
+            operation = e.target.value;
+            taskIndex = 0;
+          } else if (name === 'level') {
+            level = e.target.value;
+            taskIndex = 0;
+          } else taskIndex = +e.target.value;
+          start();
+          draw();
+          el('#tutor-' + name).focus();
+        }),
+    );
+    if (completed) {
+      el('#tutor-repeat').onclick = () => {
+        start();
+        draw();
+      };
+      el('#tutor-another').onclick = () => {
+        taskIndex = (taskIndex + 1) % 3;
+        start();
+        draw();
+      };
+      el('#tutor-level-up').onclick = () => {
+        level = level === 'easy' ? 'medium' : level === 'medium' ? 'hard' : 'easy';
+        taskIndex = 0;
+        start();
+        draw();
+      };
+      el('#tutor-solution').onclick = () =>
+        openDialog(
+          `<h2>A conta inteira, com calma</h2>${board(plan.final)}<ol>${plan.steps.map((s) => `<li><b>${s.title}:</b> ${s.why}</li>`).join('')}</ol>`,
+        );
+      return;
+    }
+    el('#tutor-answer').oninput = (e) => (draft = e.target.value);
+    el('#tutor-scratch').oninput = (e) => (scratch = e.target.value);
+    el('#tutor-form').onsubmit = (e) => {
+      e.preventDefault();
+      if (solved) return;
+      captureDraft();
+      const s = plan.steps[stepIndex],
+        status = TutorMath.grade(draft, s.answer);
+      if (status === 'invalid') {
+        feedback = {
+          type: 'invalid',
+          title: 'Vamos ajustar a escrita',
+          text: 'Digite um número natural usando apenas algarismos. Não deixe em branco; não use vírgula, ponto ou sinal.',
+        };
+      } else if (status === 'correct') {
+        if (!attempted && !hinted) firstTry++;
+        solved = true;
+        feedback = { type: 'correct', title: '✓ Você encontrou o caminho!', text: s.why };
+      } else {
+        attempted = true;
+        assisted = true;
+        feedback = {
+          type: 'wrong',
+          title: 'Vamos olhar este passo com calma',
+          text: `Nesta etapa, esperamos ${s.answer}. ${s.why} Digite esse valor para registrar a etapa, ou veja a resolução e siga acompanhando.`,
+        };
+      }
+      draw();
+      el(solved ? '#tutor-next' : '#tutor-answer').focus();
+    };
+    el('#tutor-hint').onclick = () => {
+      captureDraft();
+      hinted = true;
+      assisted = true;
+      draw();
+      el('#tutor-answer').focus();
+    };
+    if (el('#tutor-reveal'))
+      el('#tutor-reveal').onclick = () => {
+        captureDraft();
+        draft = String(plan.steps[stepIndex].answer);
+        solved = true;
+        assisted = true;
+        feedback = {
+          type: 'correct',
+          title: 'Etapa estudada com ajuda',
+          text: plan.steps[stepIndex].why,
+        };
+        draw();
+        el('#tutor-next').focus();
+      };
+    if (el('#tutor-next'))
+      el('#tutor-next').onclick = () => {
+        captureDraft();
+        if (stepIndex === plan.steps.length - 1) {
+          completed = true;
+          const key = `${operation}-${level}-${taskIndex}`;
+          if (!earned.has(key)) {
+            earned.add(key);
+            stars++;
+          }
+          draw();
+          el('#main').focus();
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches) celebrate();
+        } else {
+          stepIndex++;
+          solved = false;
+          feedback = null;
+          hinted = false;
+          attempted = false;
+          draft = '';
+          draw();
+          el('#tutor-answer').focus();
+        }
+      };
+    el('#clear-scratch').onclick = () => {
+      scratch = '';
+      el('#tutor-scratch').value = '';
+      el('#tutor-scratch').focus();
+    };
+    el('#restart-tutor').onclick = () => {
+      start();
+      draw();
+      el('#tutor-answer').focus();
+    };
+  }
+  function completeView() {
+    const badge =
+      stars >= 6
+        ? 'Exploradora de estratégias'
+        : stars >= 3
+          ? 'Construtora de confiança'
+          : 'Primeiro passo conquistado';
+    return `<section class="panel result"><div class="badge" aria-hidden="true">✦</div><span class="pill">${badge}</span><h2>Você completou uma conta!</h2><p class="formula">${plan.kind === 'mul' ? `${plan.a} × ${plan.b} = ${plan.answer}` : `${plan.a} ÷ ${plan.b}: quociente ${plan.answer}, resto ${plan.remainder}`}</p><p>${assisted ? 'Você usou o apoio para entender o caminho. Agora vale refazer e explicar os passos com suas próprias palavras.' : 'Você construiu a solução etapa por etapa. Tente contar como pensou para outra pessoa!'}</p><p><b>${firstTry} de ${plan.steps.length}</b> etapas certas na primeira tentativa, sem dica.</p><p class="small">Esse indicador é de prática, não uma nota. Conferir o próprio raciocínio faz parte de aprender.</p><div class="tip">${plan.check}</div><div class="actions" style="justify-content:center"><button class="primary" id="tutor-another">Próxima conta →</button><button class="secondary" id="tutor-repeat">Refazer esta conta</button><button class="secondary" id="tutor-solution">Revisar toda a solução</button><button class="text-button" id="tutor-level-up">${level === 'hard' ? 'Voltar ao nível fácil' : 'Experimentar o próximo nível'}</button></div></section>`;
+  }
 })();
