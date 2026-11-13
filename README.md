@@ -25,9 +25,10 @@ dist/
   tutor.css         Estilos do tutor de contas
   app.js            Conteúdo inicial, navegação e exercícios de geometria
   complemento.js    Perímetro, áreas e seleção dos desafios
+  capitulos.js      Razão e proporção, probabilidade, pesquisas estatísticas e volume
   tutor-engine.js   Algoritmos de multiplicação e divisão
   tutor.js          Interface e atividades do tutor
-  material/         Imagens dos materiais de estudo
+  material/         Imagens de estudo e PDFs dos capítulos 13 a 16
 ```
 
 HTML, CSS e JavaScript estão separados em arquivos por linguagem. Os arquivos JavaScript também geram trechos de HTML dinamicamente. Preserve a ordem dos scripts em `index.html`, pois compartilham funções e estado.

@@ -1,6 +1,36 @@
 .unit-tabs {
   margin: 22px 0;
 }
+.chapter-figure {
+  margin-inline: 0;
+}
+.chapter-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block: 16px;
+}
+.chapter-tiles > div {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #eee8fb;
+  color: #39266d;
+}
+.chapter-tiles meter {
+  display: block;
+  width: 100%;
+}
+.cube-layer {
+  display: grid;
+  grid-template-columns: repeat(3, 18px);
+  gap: 2px;
+  margin-top: 8px;
+}
+.cube-layer i {
+  height: 18px;
+  background: #9373cc;
+  border: 1px solid #563884;
+}
 .guide {
   background: #fffdf5;
   border-color: #e9dcaf;

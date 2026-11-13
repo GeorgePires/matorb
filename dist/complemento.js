@@ -156,6 +156,17 @@ const questionBanks = {
   geral: [...finalQuestions, ...areaQuestions],
 };
 const unitNames = { circle: 'Circunferência e esfera', areas: 'Perímetro e áreas' };
+for (const [id, chapter] of Object.entries(capitulos)) {
+  unitNames[id] = chapter.name;
+  for (const [topic, tip] of chapter.lessons) studyTips[topic] = tip;
+  const bank = {};
+  for (const mode of ['practice', 'final']) {
+    bank[mode] = chapter[mode].map(([prompt, choices, answer, feedback, lesson]) =>
+      Q(prompt, choices, answer, feedback, chapter.lessons[lesson][0]),
+    );
+  }
+  questionBanks[id] = bank;
+}
 questions = () =>
   mode === 'final' && exerciseSet === 'geral'
     ? questionBanks.geral
@@ -167,7 +178,7 @@ reset = function (m) {
 };
 function unitTabs() {
   const general = stage === 3 && exerciseSet === 'geral';
-  return `<div class="unit-tabs controls" aria-label="Blocos de estudo"><button class="chip ${studyUnit === 'circle' && !general ? 'selected' : ''}" data-unit="circle" aria-pressed="${studyUnit === 'circle' && !general}">◎ Circunferência e esfera</button><button class="chip ${studyUnit === 'areas' && !general ? 'selected' : ''}" data-unit="areas" aria-pressed="${studyUnit === 'areas' && !general}"><span>▱ Perímetro e áreas</span></button>${stage === 0 || stage === 3 ? `<button class="chip ${general ? 'selected' : ''}" id="general-review" aria-pressed="${general}">✦ Revisão geral</button>` : ''}</div>`;
+  return `<div class="unit-tabs controls" aria-label="Blocos de estudo"><button class="chip ${studyUnit === 'circle' && !general ? 'selected' : ''}" data-unit="circle" aria-pressed="${studyUnit === 'circle' && !general}">◎ Circunferência e esfera</button><button class="chip ${studyUnit === 'areas' && !general ? 'selected' : ''}" data-unit="areas" aria-pressed="${studyUnit === 'areas' && !general}"><span>▱ Perímetro e áreas</span></button>${chapterTabs(general)}${stage === 0 || stage === 3 ? `<button class="chip ${general ? 'selected' : ''}" id="general-review" aria-pressed="${general}">✦ Revisão geral</button>` : ''}</div>`;
 }
 function bindUnits() {
   document.querySelectorAll('[data-unit]').forEach(
@@ -243,6 +254,7 @@ function gardenDiagram() {
   );
 }
 function learn() {
+  if (capitulos[studyUnit]) return chapterLearn(capitulos[studyUnit]);
   if (studyUnit === 'circle') {
     originalLearn();
     $('.hero').insertAdjacentHTML('afterend', unitTabs() + guide());
@@ -330,6 +342,7 @@ const newLessons = [
   },
 ];
 function understand() {
+  if (capitulos[studyUnit]) return chapterExamples(capitulos[studyUnit]);
   if (studyUnit === 'circle') {
     originalUnderstand();
     $('.hero').insertAdjacentHTML('afterend', unitTabs());
@@ -411,7 +424,7 @@ function quiz() {
   const general = mode === 'final' && exerciseSet === 'geral';
   $('.hero h1').textContent =
     mode === 'practice'
-      ? `Vamos praticar ${studyUnit === 'circle' ? 'circunferência?' : 'perímetro e áreas?'}`
+      ? `Vamos praticar ${unitNames[studyUnit].toLowerCase()}?`
       : general
         ? 'Seu desafio geral.'
         : 'Seu desafio de hoje.';
@@ -430,7 +443,7 @@ function quiz() {
     const q = questions()[cursor],
       tip = studyTips[q.topic] || basics;
     openDialog(
-      `<h2>Revisar: ${q.topic}</h2><p>${tip}</p><div class="tip"><b>Roteiro:</b> o que a questão pede? Quais são as medidas? Estão na mesma unidade? Escolha a fórmula, substitua os valores e confira a unidade da resposta.</div>${q.topic === 'Comprimento' ? '<p>Primeiro calcule uma volta; depois multiplique pelo número de voltas. Confira o valor de π indicado no enunciado.</p>' : ''}<p class="small">Feche para voltar à questão. Sua resposta ainda não foi confirmada.</p>`,
+      `<h2>Revisar: ${q.topic}</h2><p>${tip}</p>${!general && capitulos[studyUnit] ? chapterLink(capitulos[studyUnit]) : '<div class="tip"><b>Roteiro:</b> o que a questão pede? Quais são as medidas? Estão na mesma unidade? Escolha a fórmula, substitua os valores e confira a unidade da resposta.</div>'}${q.topic === 'Comprimento' ? '<p>Primeiro calcule uma volta; depois multiplique pelo número de voltas. Confira o valor de π indicado no enunciado.</p>' : ''}<p class="small">Feche para voltar à questão. Sua resposta ainda não foi confirmada.</p>`,
     );
   };
 }
@@ -461,7 +474,7 @@ function showMaterial(page = 1) {
     ];
   const selectedPage = all[page - 1];
   openDialog(
-    `<h2>Materiais da sua jornada</h2><p>PDF original, páginas 1–8, e os quatro novos anexos: resumo e exercícios de revisão.</p><label for="page-select">Escolha o material </label><select id="page-select" class="wide-select">${all.map((x, i) => `<option value="${i + 1}" ${page === i + 1 ? 'selected' : ''}>${x.label}</option>`).join('')}</select><p class="small">As fotos são referências. O conteúdo está transcrito e explicado nas etapas de estudo.</p><img class="page-image" src="material/${selectedPage.file}" alt="${selectedPage.label}">`,
+    `<h2>Materiais da sua jornada</h2><div class="controls">${Object.values(capitulos).map(chapterLink).join('')}</div><p>PDF original, páginas 1–8, e os quatro novos anexos: resumo e exercícios de revisão.</p><label for="page-select">Escolha o material </label><select id="page-select" class="wide-select">${all.map((x, i) => `<option value="${i + 1}" ${page === i + 1 ? 'selected' : ''}>${x.label}</option>`).join('')}</select><p class="small">As fotos são referências. O conteúdo está transcrito e explicado nas etapas de estudo.</p><img class="page-image" src="material/${selectedPage.file}" alt="${selectedPage.label}">`,
   );
   $('#page-select').onchange = (e) => showMaterial(+e.target.value);
 }
