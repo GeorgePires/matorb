@@ -1,5 +1,5 @@
 // Ampliação baseada no resumo e nas duas páginas de revisão enviados em 27/10/2026.
-let studyUnit = 'areas',
+let studyUnit = 'razao',
   exerciseSet = 'topic',
   lessonIndex = 0,
   lessonStep = 1;
@@ -178,17 +178,37 @@ reset = function (m) {
   if (m === 'final' && stage !== 3) exerciseSet = 'topic';
   originalReset(m);
 };
+let previousUnitsOpen = false;
+
+function reviewChip(key, id) {
+  const active = stage === 3 && exerciseSet === key;
+  return `<button class="chip ${active ? 'selected' : ''}" id="${id}" aria-pressed="${active}">✦ ${reviewNames[key]}</button>`;
+}
+
 function unitTabs() {
   const general = stage === 3 && reviewNames[exerciseSet];
-  const reviewTabs = Object.entries(reviewNames)
-    .map(([key, name]) => {
-      const active = stage === 3 && exerciseSet === key;
-      return `<button class="chip ${active ? 'selected' : ''}" id="${key === 'geral' ? 'general-review' : 'general-review-2'}" aria-pressed="${active}">✦ ${name}</button>`;
+  const previousTopics = [
+    ['circle', '◎'],
+    ['areas', '▱'],
+  ]
+    .map(([id, icon]) => {
+      const active = studyUnit === id && !general;
+      return `<button class="chip ${active ? 'selected' : ''}" data-unit="${id}" aria-pressed="${active}">${icon} ${unitNames[id]}</button>`;
     })
     .join('');
-  return `<div class="unit-tabs controls" aria-label="Blocos de estudo"><button class="chip ${studyUnit === 'circle' && !general ? 'selected' : ''}" data-unit="circle" aria-pressed="${studyUnit === 'circle' && !general}">◎ Circunferência e esfera</button><button class="chip ${studyUnit === 'areas' && !general ? 'selected' : ''}" data-unit="areas" aria-pressed="${studyUnit === 'areas' && !general}"><span>▱ Perímetro e áreas</span></button>${chapterTabs(general)}${stage === 0 || stage === 3 ? reviewTabs : ''}</div>`;
+  return `<section class="unit-tabs" aria-label="Blocos de estudo">
+    <div class="controls">${chapterTabs(general)}${stage === 0 || stage === 3 ? reviewChip('geral2', 'general-review-2') : ''}</div>
+    <button class="previous-toggle" id="previous-toggle" aria-expanded="${previousUnitsOpen}" aria-controls="previous-units">Revisar conteúdos anteriores <span aria-hidden="true">⌄</span></button>
+    <div class="previous-units controls" id="previous-units" ${previousUnitsOpen ? '' : 'hidden'}>${previousTopics}${reviewChip('geral', 'general-review')}</div>
+  </section>`;
 }
 function bindUnits() {
+  const toggle = $('#previous-toggle');
+  toggle.onclick = () => {
+    previousUnitsOpen = !previousUnitsOpen;
+    toggle.setAttribute('aria-expanded', String(previousUnitsOpen));
+    $('#previous-units').hidden = !previousUnitsOpen;
+  };
   document.querySelectorAll('[data-unit]').forEach(
     (b) =>
       (b.onclick = () => {
