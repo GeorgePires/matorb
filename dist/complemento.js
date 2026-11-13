@@ -198,7 +198,9 @@ function unitTabs() {
     .join('');
   return `<section class="unit-tabs" aria-label="Blocos de estudo">
     <div class="controls">${chapterTabs(general)}${stage === 0 || stage === 3 ? reviewChip('geral2', 'general-review-2') : ''}</div>
-    <button class="previous-toggle" id="previous-toggle" aria-expanded="${previousUnitsOpen}" aria-controls="previous-units">Revisar conteúdos anteriores <span aria-hidden="true">⌄</span></button>
+    <button class="previous-toggle" id="previous-toggle" aria-expanded="${previousUnitsOpen}" aria-controls="previous-units">Revisar conteúdos anteriores
+      <svg class="previous-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
     <div class="previous-units controls" id="previous-units" ${previousUnitsOpen ? '' : 'hidden'}>${previousTopics}${reviewChip('geral', 'general-review')}</div>
   </section>`;
 }

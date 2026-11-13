@@ -18,11 +18,12 @@
 .previous-toggle[aria-expanded='true'] {
   background: #ebe5f8;
 }
-.previous-toggle span {
-  display: inline-block;
+.previous-chevron {
+  display: block;
+  flex: none;
   transition: transform 0.18s ease;
 }
-.previous-toggle[aria-expanded='true'] span {
+.previous-toggle[aria-expanded='true'] .previous-chevron {
   transform: rotate(180deg);
 }
 .previous-units {
@@ -50,7 +51,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .previous-toggle span {
+  .previous-chevron {
     transition: none;
   }
 }
