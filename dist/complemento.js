@@ -154,6 +154,7 @@ const questionBanks = {
   circle: { practice: [...practice, ...sheetQuestions.slice(0, 4)], final: finalQuestions },
   areas: { practice: areaQuestions, final: areaQuestions },
   geral: [...finalQuestions, ...areaQuestions],
+  geral2: buildSecondReview(),
 };
 const unitNames = { circle: 'Circunferência e esfera', areas: 'Perímetro e áreas' };
 for (const [id, chapter] of Object.entries(capitulos)) {
@@ -167,9 +168,10 @@ for (const [id, chapter] of Object.entries(capitulos)) {
   }
   questionBanks[id] = bank;
 }
+const reviewNames = { geral: 'Revisão geral', geral2: 'Revisão geral 2º' };
 questions = () =>
-  mode === 'final' && exerciseSet === 'geral'
-    ? questionBanks.geral
+  mode === 'final' && reviewNames[exerciseSet]
+    ? questionBanks[exerciseSet]
     : questionBanks[studyUnit][mode === 'practice' ? 'practice' : 'final'];
 const originalReset = reset;
 reset = function (m) {
@@ -177,14 +179,20 @@ reset = function (m) {
   originalReset(m);
 };
 function unitTabs() {
-  const general = stage === 3 && exerciseSet === 'geral';
-  return `<div class="unit-tabs controls" aria-label="Blocos de estudo"><button class="chip ${studyUnit === 'circle' && !general ? 'selected' : ''}" data-unit="circle" aria-pressed="${studyUnit === 'circle' && !general}">◎ Circunferência e esfera</button><button class="chip ${studyUnit === 'areas' && !general ? 'selected' : ''}" data-unit="areas" aria-pressed="${studyUnit === 'areas' && !general}"><span>▱ Perímetro e áreas</span></button>${chapterTabs(general)}${stage === 0 || stage === 3 ? `<button class="chip ${general ? 'selected' : ''}" id="general-review" aria-pressed="${general}">✦ Revisão geral</button>` : ''}</div>`;
+  const general = stage === 3 && reviewNames[exerciseSet];
+  const reviewTabs = Object.entries(reviewNames)
+    .map(([key, name]) => {
+      const active = stage === 3 && exerciseSet === key;
+      return `<button class="chip ${active ? 'selected' : ''}" id="${key === 'geral' ? 'general-review' : 'general-review-2'}" aria-pressed="${active}">✦ ${name}</button>`;
+    })
+    .join('');
+  return `<div class="unit-tabs controls" aria-label="Blocos de estudo"><button class="chip ${studyUnit === 'circle' && !general ? 'selected' : ''}" data-unit="circle" aria-pressed="${studyUnit === 'circle' && !general}">◎ Circunferência e esfera</button><button class="chip ${studyUnit === 'areas' && !general ? 'selected' : ''}" data-unit="areas" aria-pressed="${studyUnit === 'areas' && !general}"><span>▱ Perímetro e áreas</span></button>${chapterTabs(general)}${stage === 0 || stage === 3 ? reviewTabs : ''}</div>`;
 }
 function bindUnits() {
   document.querySelectorAll('[data-unit]').forEach(
     (b) =>
       (b.onclick = () => {
-        if (studyUnit !== b.dataset.unit || (stage === 3 && exerciseSet === 'geral')) {
+        if (studyUnit !== b.dataset.unit || (stage === 3 && reviewNames[exerciseSet])) {
           studyUnit = b.dataset.unit;
           if (stage === 2 || stage === 3) {
             exerciseSet = 'topic';
@@ -195,17 +203,22 @@ function bindUnits() {
         $('#main').focus();
       }),
   );
-  const generalButton = $('#general-review');
-  if (generalButton)
-    generalButton.onclick = () => {
-      if (stage !== 3 || exerciseSet !== 'geral') {
+  for (const [key, id] of [
+    ['geral', '#general-review'],
+    ['geral2', '#general-review-2'],
+  ]) {
+    const button = $(id);
+    if (!button) continue;
+    button.onclick = () => {
+      if (stage !== 3 || exerciseSet !== key) {
         stage = 3;
-        exerciseSet = 'geral';
+        exerciseSet = key;
         reset('final');
       }
       navigate(3);
-      $('#general-review').focus();
+      $(id).focus();
     };
+  }
 }
 function guide() {
   return `<section class="panel guide"><span class="eyebrow">SEU ROTEIRO DE ESTUDO</span><h2>Uma ideia de cada vez</h2><p class="small">Siga a ordem e marque o que já estudou. As marcações ficam neste navegador, quando o armazenamento está disponível.</p><div class="guide-grid">${guideItems.map((s, i) => `<label><input type="checkbox" data-guide="${i}" ${guideChecks.includes(i) ? 'checked' : ''}><span><b>0${i + 1}</b> ${s}</span></label>`).join('')}</div><p class="small" id="guide-status" role="status">${guideChecks.length} de 5 passos marcados por você.</p><button class="text-button" id="clear-guide">Limpar marcações</button></section>`;
@@ -421,16 +434,27 @@ function convertArea() {
 function quiz() {
   originalQuiz();
   if (cursor >= questions().length) return;
-  const general = mode === 'final' && exerciseSet === 'geral';
+  const general = mode === 'final' && reviewNames[exerciseSet];
+  const second = general && exerciseSet === 'geral2';
   $('.hero h1').textContent =
     mode === 'practice'
       ? `Vamos praticar ${unitNames[studyUnit].toLowerCase()}?`
       : general
-        ? 'Seu desafio geral.'
+        ? second
+          ? reviewNames.geral2
+          : 'Seu desafio geral.'
         : 'Seu desafio de hoje.';
-  $('.hero p').textContent = general
-    ? 'Uma revisão com os dois conteúdos. Use o que aprendeu e confira seu raciocínio.'
-    : `${unitNames[studyUnit]} · ${questions().length} questões para avançar no seu ritmo.`;
+  const q = questions()[cursor];
+  if (second)
+    $('.question').insertAdjacentHTML(
+      'beforebegin',
+      `<p class="small">${unitNames[q.unit]} · ${q.source}</p>`,
+    );
+  $('.hero p').textContent = second
+    ? '20 questões de razão e proporção, probabilidade, pesquisas estatísticas e volume. Você pode consultar uma explicação antes de responder.'
+    : general
+      ? 'Uma revisão com os dois conteúdos. Use o que aprendeu e confira seu raciocínio.'
+      : `${unitNames[studyUnit]} · ${questions().length} questões para avançar no seu ritmo.`;
   $('.hero').insertAdjacentHTML(
     'afterend',
     unitTabs() +
@@ -440,17 +464,17 @@ function quiz() {
   );
   bindUnits();
   $('#review-before').onclick = () => {
-    const q = questions()[cursor],
-      tip = studyTips[q.topic] || basics;
+    const tip = studyTips[q.topic] || basics;
+    const chapter = second ? capitulos[q.unit] : !general && capitulos[studyUnit];
     openDialog(
-      `<h2>Revisar: ${q.topic}</h2><p>${tip}</p>${!general && capitulos[studyUnit] ? chapterLink(capitulos[studyUnit]) : '<div class="tip"><b>Roteiro:</b> o que a questão pede? Quais são as medidas? Estão na mesma unidade? Escolha a fórmula, substitua os valores e confira a unidade da resposta.</div>'}${q.topic === 'Comprimento' ? '<p>Primeiro calcule uma volta; depois multiplique pelo número de voltas. Confira o valor de π indicado no enunciado.</p>' : ''}<p class="small">Feche para voltar à questão. Sua resposta ainda não foi confirmada.</p>`,
+      `<h2>Revisar: ${q.topic}</h2><p>${tip}</p>${chapter ? chapterLink(chapter) : '<div class="tip"><b>Roteiro:</b> o que a questão pede? Quais são as medidas? Estão na mesma unidade? Escolha a fórmula, substitua os valores e confira a unidade da resposta.</div>'}${q.topic === 'Comprimento' ? '<p>Primeiro calcule uma volta; depois multiplique pelo número de voltas. Confira o valor de π indicado no enunciado.</p>' : ''}<p class="small">Feche para voltar à questão. Sua resposta ainda não foi confirmada.</p>`,
     );
   };
 }
 function result() {
   originalResult();
   $('.result .pill').textContent =
-    (mode === 'final' && exerciseSet === 'geral' ? 'Revisão geral' : unitNames[studyUnit]) +
+    ((mode === 'final' && reviewNames[exerciseSet]) || unitNames[studyUnit]) +
     ' · ' +
     (mode === 'final' ? 'Desafio concluído' : 'Prática concluída');
   const qs = questions(),
