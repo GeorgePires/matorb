@@ -4,6 +4,28 @@
 .chapter-figure {
   margin-inline: 0;
 }
+.guided-lesson > p,
+.guided-lesson details p,
+.guided-steps {
+  max-width: 72ch;
+}
+.guided-lesson .tip h3 {
+  margin: 0 0 0.5rem;
+}
+.guided-lesson summary {
+  cursor: pointer;
+  padding-block: 0.55rem;
+  color: #50369e;
+  font-weight: 650;
+}
+.guided-steps li {
+  margin-block: 1rem;
+  padding-inline-start: 0.4rem;
+}
+.guided-steps li::marker {
+  color: #583bc0;
+  font-weight: bold;
+}
 .chapter-tiles {
   display: flex;
   flex-wrap: wrap;

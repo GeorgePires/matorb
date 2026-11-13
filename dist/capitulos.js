@@ -451,33 +451,264 @@ function chapterVisual(id) {
   return `<figure class="panel chapter-figure"><h2>${title}</h2><div class="chapter-tiles">${items.map((item, i) => `<div><strong>${item}</strong>${id === 'pesquisas' ? '<meter min="0" max="20" value="' + [10, 6, 4][i] + '"></meter>' : id === 'volume' ? '<span class="cube-layer" aria-hidden="true">' + '<i></i>'.repeat(6) + '</span>' : ''}</div>`).join('')}</div><figcaption>${note}</figcaption></figure>`;
 }
 
+const chapterGuides = {
+  razao: [
+    [
+      'Na cozinha',
+      'Lia mistura 2 copos de suco concentrado e 4 de água. Desenhe os seis copos. Circule um de suco e dois de água, depois faça outro grupo igual. Ler 1 para 2 é dizer em voz alta o que há em cada grupo.',
+      'Que parte da bebida pronta é concentrado?',
+      'Dois copos entre seis. A razão é 2/6 = 1/3. Se você pensou em 2/4, comparou o suco apenas com a água. A palavra “pronta” pede a mistura inteira.',
+    ],
+    [
+      'Quanto corresponde a uma unidade?',
+      'Uma ciclista percorre 24 km em 3 horas. Divida o percurso em três partes iguais de 8 km. Isso explica a média de 8 km por hora, mesmo que a ciclista tenha pedalado mais rápido em alguns trechos.',
+      'E se um bairro de 3 km² tiver 600 moradores?',
+      'Reparta 600 por 3. São 200 habitantes por quilômetro quadrado, em média. Leia a unidade em voz alta para lembrar qual medida entra no divisor.',
+    ],
+    [
+      'Uma receita para mais pessoas',
+      'Copie duas linhas no caderno. Na primeira, escreva 2 copos de suco e 4 de água. Na segunda, escreva 6 de suco. O suco foi multiplicado por 3. A água precisa acompanhar esse fator para manter o sabor.',
+      'Devemos acrescentar 4 copos de água ou multiplicar a água por 3?',
+      'Multiplique 4 por 3 para obter 12. Confira dividindo 12 por 6. Continuam sendo 2 copos de água para cada copo de suco. Com apenas 8, a bebida ficaria mais forte.',
+    ],
+    [
+      'O que fica fixo?',
+      'Quatro cadernos iguais custam R$ 20. Descubra o preço de um antes de calcular o de seis. Já para encher um balde, duas torneiras iguais dividem o mesmo trabalho. Dobrar a vazão reduz o tempo à metade.',
+      'Um táxi cobra R$ 5 de partida e mais R$ 2 por quilômetro. Dobrar a distância dobra o preço?',
+      'Teste com 1 e 2 km. As corridas custam R$ 7 e R$ 9. Para dobrar, a segunda teria de custar R$ 14. A taxa de partida explica a diferença.',
+    ],
+    [
+      'O preço sobre o qual calculamos',
+      'Uma mochila custa R$ 80. Para encontrar 10%, imagine dividir o preço em dez partes iguais. Cada parte vale R$ 8. Um desconto de 20% tira duas dessas partes.',
+      'R$ 16 é o preço que você paga ou a quantia que economiza?',
+      'Você economiza R$ 16 e paga R$ 64. Confira juntando o desconto e o preço final. R$ 16 + R$ 64 recupera os R$ 80.',
+    ],
+  ],
+  probabilidade: [
+    [
+      'O saquinho de fichas',
+      'Imagine três fichas vermelhas e uma azul dentro de um saquinho. Agite e tire uma sem olhar. Sabemos quais cores podem sair. Há mais maneiras de pegar vermelha, mas a azul também pode aparecer.',
+      'O que dá para garantir antes do sorteio?',
+      'A ficha será vermelha ou azul. Essa afirmação cobre todas as fichas. Uma ficha verde seria impossível, pois o saquinho não contém nenhuma.',
+    ],
+    [
+      'Faça uma árvore no caderno',
+      'Imagine lançar uma moeda duas vezes. Desenhe dois ramos para o primeiro lançamento, cara e coroa. Na ponta de cada ramo, desenhe outros dois para o segundo. Leia cada caminho do começo ao fim.',
+      'Em quantos caminhos aparece exatamente uma cara?',
+      'Em dois. Cara seguida de coroa e coroa seguida de cara. Os outros caminhos têm duas caras ou nenhuma. Anotar a ordem evita perder um resultado.',
+    ],
+    [
+      'Por que contar fichas?',
+      'Desenhe quatro bolinhas. Pinte uma de azul e três de amarelo. Cada bolinha representa uma ficha do mesmo tamanho em um sorteio bem misturado. Aponte para todas as que servem se você quiser tirar amarelo.',
+      'Há duas cores. Isso dá metade da chance para cada uma?',
+      'Três das quatro fichas são amarelas, portanto a chance é 3/4 = 75%. As cores aparecem em quantidades diferentes. A unidade que tem chances iguais aqui é a ficha.',
+    ],
+    [
+      'Do palpite ao registro',
+      'Lance uma moeda equilibrada dez vezes e faça um risco para cada cara. Imagine que o papel mostre sete riscos. Sua contagem descreve essa rodada. Outra rodada pode dar outro total.',
+      'Qual foi a frequência de caras? E qual a chance no próximo lançamento?',
+      'Nesta rodada, 7/10 = 70%. No próximo lançamento, a moeda equilibrada continua tendo 50% de chance de cara. Ela não guarda memória dos sete riscos.',
+    ],
+  ],
+  pesquisas: [
+    [
+      'Quem precisa ser ouvido?',
+      'O 7º ano vai escolher o horário de uma feira. Para entender suas preferências, pense em todas as turmas e turnos. Se você ouvir apenas as amigas que chegam cedo, quem chega à tarde ficará de fora.',
+      'Ouvir todos os alunos do 7º ano já seria um censo?',
+      'Sim, se a pergunta se refere ao 7º ano. Para investigar a escola inteira, o mesmo grupo seria só uma parte da população. Tudo começa com a definição do grupo.',
+    ],
+    [
+      'Como escrever a pergunta?',
+      'Experimente perguntar “Qual oficina você gostaria de fazer?”. Cada pessoa pode citar a sua. Depois experimente dar teatro, música, desenho e outra como opções. Apresente a mesma pergunta a todos para poder comparar as respostas.',
+      '“Você também adora teatro?” ajuda a descobrir a preferência da turma?',
+      'O “também” convida a concordar. Experimente “Qual dessas oficinas você prefere?”. Peça uma escolha por pessoa para que cada voto conte uma única vez.',
+    ],
+    [
+      'Do risco à barra',
+      'Numa turma de 10 alunos, música recebeu 5 votos, teatro recebeu 3 e desenho recebeu 2. Faça uma linha por oficina e um risco por voto. Confira se os riscos somam 10. Para desenhar as barras, comece no zero e use um quadradinho por voto.',
+      'Qual oficina ocuparia metade de um gráfico de setores?',
+      'Música reuniu 5 dos 10 votos. Sua barra alcança 5 e seu setor cobre metade do círculo. Os dois gráficos mostram a mesma contagem de maneiras diferentes.',
+    ],
+    [
+      'Dê um limite à conclusão',
+      'Imagine que os 10 votos vieram do 7º B. No relatório, diga quem respondeu, quantas pessoas participaram e qual oficina recebeu mais votos. Se repetir a votação todo mês, um gráfico de linhas ajuda a acompanhar a mudança.',
+      'Podemos escrever que a escola inteira prefere música?',
+      'Os dados permitem escrever “Música foi a oficina mais votada entre os 10 participantes do 7º B, com 5 votos”. As outras turmas ainda não responderam.',
+    ],
+  ],
+  volume: [
+    [
+      'Os cubinhos escondidos',
+      'Desenhe uma fileira de 3 quadradinhos e outra igual logo abaixo. Imagine um cubinho de 1 cm de aresta em cada lugar. A base tem 6 cubinhos. Ao colocar outra camada por cima, a de baixo continua ocupando espaço.',
+      'Quantos cubinhos há em três camadas iguais?',
+      'Conte 6 + 6 + 6 = 18. Cada camada acrescenta seis cubinhos, incluindo os que ficaram escondidos. O volume é 18 cm³.',
+    ],
+    [
+      'Por que três medidas?',
+      'Uma caixa mede por dentro 4 cm de comprimento, 3 cm de largura e 2 cm de altura. O fundo tem 4 × 3 = 12 lugares para apoiar cubinhos. A altura diz quantas vezes repetir essa base. As medidas internas deixam as paredes fora da conta.',
+      'Se só a altura passar de 2 para 4 cm, o que acontece?',
+      'O volume passa de 12 × 2 = 24 cm³ para 12 × 4 = 48 cm³. Os dois centímetros extras trazem duas camadas inteiras. Por isso o volume dobra.',
+    ],
+    [
+      'Um litro feito de cubinhos',
+      'Um decímetro mede 10 cm. Imagine um cubo de 1 dm de aresta feito de cubinhos de 1 cm. Cabem dez numa fileira, dez fileiras numa camada e dez camadas no cubo. Isso dá 1.000 cm³ de espaço interno, o equivalente a um litro.',
+      'Um recipiente com 500 cm³ de espaço interno comporta quanto?',
+      'Como 500 é metade de 1.000, cabem meio litro ou 500 mL. Confira lembrando que 1 cm³ corresponde a 1 mL.',
+    ],
+    [
+      'Qual espaço interessa?',
+      'Num aquário, a altura do vidro, a da água e a espessura da areia podem ser três medidas diferentes. Faça um risco na altura que interessa. Para medir a areia, imagine retirar toda a água e observar só a camada do fundo.',
+      'Uma caixa de 12 L contém 8 L de água. Quanto espaço falta preencher?',
+      'Pense no interior como duas partes. Água + espaço vazio = 12 L. Faltam 12 − 8 = 4 L. Somar 12 e 8 contaria a água duas vezes.',
+    ],
+  ],
+};
+const guidingQuestions = {
+  razao: [
+    [
+      'O que o 40 representa na escala?',
+      'Qual conta transforma os 5 cm do desenho em centímetros reais?',
+      'Como escrever a resposta em metros e conferir o sentido?',
+    ],
+    [
+      'O que acontece com o tempo ao abrir mais uma torneira?',
+      'Quanto trabalho é necessário para encher o tanque?',
+      'Como repartir esse trabalho entre quatro torneiras?',
+    ],
+    [
+      'Quanto vale o primeiro rendimento nos dois casos?',
+      'Sobre qual valor calculamos os juros simples no segundo mês?',
+      'Qual é a nova base nos juros compostos?',
+    ],
+  ],
+  probabilidade: [
+    [
+      'Fixe o primeiro dado em 1. Quantos resultados há para o segundo? E se variar o primeiro também?',
+      'Que pares dão soma 4? Teste cada valor do primeiro dado.',
+      'Como transformar sua contagem numa chance?',
+    ],
+    [
+      'Qual número representa todas as tentativas?',
+      'Como escrever a parte das cobranças que terminou em gol?',
+      'Como interpretar essa fração em cem cobranças semelhantes?',
+    ],
+  ],
+  pesquisas: [
+    [
+      'Quem poderia participar para que diferentes turmas sejam ouvidas?',
+      'Qual pergunta permitiria comparar as respostas?',
+      'Como os votos se transformam numa conclusão? ',
+    ],
+    [
+      'Quantas respostas pertencem a cada grupo?',
+      'Que parte das 20 respostas pertence a cada grupo?',
+      'Quantos graus do círculo pertencem a cada parte?',
+    ],
+  ],
+  volume: [
+    [
+      'Quantos cubinhos cabem em uma única camada?',
+      'Quantas vezes a base vai se repetir?',
+      'Qual é o volume e qual unidade acompanha o resultado?',
+    ],
+    [
+      'Qual altura interessa para medir só a areia?',
+      'Quantos centímetros cúbicos há nas cinco camadas?',
+      'Como passar para decímetros cúbicos?',
+    ],
+  ],
+};
+const additionalExamples = {
+  razao: [
+    'Se 4 pães custam R$ 6, quanto custam 10 pães do mesmo preço?',
+    'Como descobrir o preço de um pão?',
+    'Reparta R$ 6 entre os 4 pães. Cada pão custa R$ 1,50. Esse valor por unidade liga as duas compras.',
+    'Como montar a compra de 10 pães?',
+    'Multiplique o preço de um pão por 10. Dez parcelas de R$ 1,50 totalizam R$ 15.',
+    'Como conferir sem repetir a mesma conta?',
+    'Oito pães custam o dobro de quatro, ou R$ 12. Mais dois pães custam R$ 3. A soma também dá R$ 15.',
+  ],
+  probabilidade: [
+    'Num saquinho há 2 fichas azuis e 3 verdes. Qual é a chance de tirar uma verde sem olhar?',
+    'O que deve ser contado antes de escolher uma cor?',
+    'Desenhe as cinco fichas. Suponha que todas têm a mesma chance de serem retiradas. O total de resultados é 5.',
+    'Quantos resultados servem para a pergunta?',
+    'Circule as três verdes. A chance é 3 em 5. Divida 3 por 5 para obter 0,6, ou 60%.',
+    'Como conferir usando a outra cor?',
+    'As azuis representam 2/5 = 40%. Juntas, as duas cores somam 100%, pois qualquer ficha sorteada pertence a uma delas.',
+  ],
+  pesquisas: [
+    'Dez estudantes escolheram livros. Quatro votaram em mistério, quatro em aventura e dois em poesia. Como contar o resultado à turma?',
+    'Os votos registrados representam as dez pessoas?',
+    'Some 4 + 4 + 2 = 10. Como cada estudante escolheu um livro, o total da tabela deve bater com o número de participantes.',
+    'Como desenhar barras que permitam comparar os votos?',
+    'Marque o zero e use um quadradinho por voto. Mistério e aventura chegam à marca 4. Poesia chega à marca 2.',
+    'Que conclusão cabe no relatório?',
+    'Houve empate entre mistério e aventura na amostra. Cada um recebeu 4 dos 10 votos. Escolher apenas um vencedor esconderia o empate.',
+  ],
+  volume: [
+    'Uma caixa tem 30 cm de comprimento, 20 cm de largura e 1 dm de altura por dentro. Cabem 5 litros?',
+    'Como colocar as medidas na mesma unidade?',
+    'Troque 1 dm por 10 cm. A base tem 30 × 20 = 600 cm². A camada de 1 cm de altura sobre ela ocupa 600 cm³.',
+    'Como calcular o espaço das dez camadas?',
+    'Multiplique 600 por 10. A caixa inteira tem 6.000 cm³ de espaço interno.',
+    'Como comparar o resultado com os 5 litros?',
+    'Cada 1.000 cm³ comporta 1 L. Cabem 6 L ao todo. Depois de colocar 5 L, ainda sobra espaço para 1 L.',
+  ],
+};
+
 function chapterLearn(chapter) {
+  const guides = chapterGuides[studyUnit];
   $('#main').innerHTML =
     hero('CAPÍTULO ' + chapter.n, chapter.name, chapter.intro) +
     unitTabs() +
     chapterVisual(studyUnit) +
-    '<div class="cards concept-cards">' +
     chapter.lessons
-      .map(([title, text]) => `<article class="card"><h3>${title}</h3><p>${text}</p></article>`)
+      .map(([topic, summary], i) => {
+        const [scene, story, question, answer] = guides[i];
+        return `<article class="panel guided-lesson"><span class="eyebrow">${i + 1} DE ${guides.length} · ${topic}</span>
+      <h2>${scene}</h2><p>${story}</p>
+      <div class="tip"><h3>${question}</h3><details><summary>Conferir meu raciocínio</summary><p>${answer}</p></details></div>
+      <details><summary>Relembrar o conceito</summary><p>${summary}</p></details></article>`;
+      })
       .join('') +
-    '</div>' +
     `<div class="end-row">${chapterLink(chapter)}<button class="primary" id="chapter-next">Ver exemplos passo a passo →</button></div>`;
   bindUnits();
   $('#chapter-next').onclick = () => navigate(1);
 }
 
 function chapterExamples(chapter) {
+  const extra = additionalExamples[studyUnit];
+  const examples = chapter.examples.map(([prompt, ...answers], index) => ({
+    prompt,
+    steps: answers.map((answer, i) => [guidingQuestions[studyUnit][index][i], answer]),
+  }));
+  const first = {
+    prompt: extra[0],
+    steps: [
+      [extra[1], extra[2]],
+      [extra[3], extra[4]],
+      [extra[5], extra[6]],
+    ],
+  };
+  if (studyUnit === 'volume' || studyUnit === 'pesquisas') examples.push(first);
+  else examples.unshift(first);
   $('#main').innerHTML =
     hero(
       'ENTENDER · CAPÍTULO ' + chapter.n,
       chapter.name,
-      'Tente explicar sua ideia. Depois, abra a resolução para conferir cada passo.',
+      'Leia a pergunta de cada passo, tente no caderno e abra a explicação para comparar com sua ideia.',
     ) +
     unitTabs() +
-    chapter.examples
+    examples
       .map(
-        ([prompt, ...steps]) =>
-          `<article class="panel"><h2>${prompt}</h2><details><summary>Ver resolução passo a passo</summary><ol>${steps.map((step) => '<li>' + step + '</li>').join('')}</ol></details></article>`,
+        ({ prompt, steps }) => `<article class="panel guided-lesson"><h2>${prompt}</h2>
+      <ol class="guided-steps">${steps
+        .map(
+          ([question, answer]) => `<li><strong>${question}</strong>
+        <details><summary>Ver este passo</summary><p>${answer}</p></details></li>`,
+        )
+        .join('')}</ol></article>`,
       )
       .join('') +
     `<div class="end-row">${chapterLink(chapter)}<button class="primary" id="chapter-next">Praticar este capítulo →</button></div>`;
